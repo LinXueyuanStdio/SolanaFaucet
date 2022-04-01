@@ -1,4 +1,13 @@
 {
+    "name": "faucet",
+    "version": "1.0.0",
+    "scripts": {
+        "test": "anchor test",
+        "build": "anchor build",
+        "predeploy:devnet": "npm run build",
+        "deploy:devnet": "anchor deploy --url https://devnet.solana.com"
+    },
+    "private": true,
     "dependencies": {
         "@project-serum/anchor": "^0.23.0"
     },
