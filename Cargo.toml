@@ -2,6 +2,3 @@
 members = [
     "programs/*"
 ]
-[dependencies]
-anchor-lang = "0.4.1"
-anchor-spl = "0.4.1"
