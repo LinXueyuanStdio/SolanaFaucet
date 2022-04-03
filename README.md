@@ -13,6 +13,18 @@ rustup component add rustfmt
 ```shell
 sh -c "$(curl -sSfL https://release.solana.com/v1.9.1/install)"
 ```
+按照安装成功的提示，把路径加入环境变量。
+
+第一次运行本地网前，先创建钱包
+```shell
+solana-keygen new
+```
+然后启动本地网
+```
+solana-test-validator
+```
+能够启动成功就 Ctrl+C 退出
+
 ## Nodejs, npm, yarn
 ```shell
 curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
@@ -34,8 +46,8 @@ cd faucet
 # 前置知识
 
 Cross-Program Invocations (CPI): 跨程序调用
-Program Derived Addresses (PDA): 程序派生地址
 
+Program Derived Addresses (PDA): 程序派生地址
 
 PDA 允许在程序之间调用时使用以编程方式生成的 signatures。
 使用 PDA，程序可以被授予对帐户的权限，然后将该权限转移给另一个。

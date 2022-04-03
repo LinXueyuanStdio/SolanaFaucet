@@ -58,7 +58,7 @@ pub struct FaucetConfig {
     token_mint: Pubkey, // Program 的 Account 地址，其中存储了 Token 的信息
     token_authority: Pubkey, // Program 的授权
     nonce: u8,
-    drip_volume: u64,
+    drip_volume: u64, // 水滴体积（水龙头一次给多少币）
 }
 
 #[derive(Accounts)]
