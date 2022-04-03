@@ -1,4 +1,4 @@
-const { Program, Provider, Wallet, web3, workspace, BN, setProvider } = require("@project-serum/anchor");
+const { workspace, BN, setProvider } = require("@project-serum/anchor");
 const { TokenInstructions } = require('@project-serum/serum');
 const { createMint } = require("@project-serum/common")
 

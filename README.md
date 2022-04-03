@@ -20,7 +20,7 @@ sh -c "$(curl -sSfL https://release.solana.com/v1.9.1/install)"
 solana-keygen new
 ```
 然后启动本地网
-```
+```shell
 solana-test-validator
 ```
 能够启动成功就 Ctrl+C 退出
