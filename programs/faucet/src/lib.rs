@@ -8,8 +8,12 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod faucet {
     use super::*;
 
-    pub fn initialize(ctx: Context<InitializeFaucet>, drip_volume: u64) -> Result<()> {
+    pub fn initialize(ctx: Context<InitializeFaucet>, nonce: u8, drip_volume: u64) -> Result<()> {
         let faucet_config = &mut ctx.accounts.faucet_config;
+        faucet_config.token_program = *ctx.accounts.token_program.key;
+        faucet_config.token_mint = *ctx.accounts.token_mint.key;
+        faucet_config.token_authority = *ctx.accounts.token_authority.key;
+        faucet_config.nonce = nonce;
         faucet_config.drip_volume = drip_volume;
         Ok(())
     }
@@ -35,22 +39,52 @@ pub mod faucet {
 
 #[account] // 宏：序列化和反序列化
 pub struct FaucetConfig {
-    pub authority: Pubkey,
-    pub drip_volume: u64, // 水滴体积（水龙头一次给多少币）
+    /// CHECK:
+    token_program: Pubkey,   // 一个 Solana Program 的公钥
+    token_mint: Pubkey,      // Program 的 Account 地址，其中存储了 Token 的信息
+    token_authority: Pubkey, // Program 的授权
+    nonce: u8,
+    drip_volume: u64, // 水滴体积（水龙头一次给多少币）
 }
 
-#[derive(Accounts)] // Programs 对应的账户
+#[derive(Accounts)]
 pub struct InitializeFaucet<'info> {
-    #[account(init, payer = user, space = 8 + 40)]
+    #[account(init, payer = user, space = 8 + 8)]
     pub faucet_config: Account<'info, FaucetConfig>, // 新 account 需要初始化数据
+    /// CHECK:
+    #[account(constraint = token_program.key == &token::ID)] //检查token_program是否正确
+    pub token_program: AccountInfo<'info>,
+    /// CHECK:
     #[account(mut)]
-    pub user: Signer<'info>, //让 Program能够把数据持久化到 account.data 中
+    pub token_mint: AccountInfo<'info>, //让 Program能够把数据持久化到 account.data 中
+    /// CHECK:
+    #[account()]
+    pub token_authority: AccountInfo<'info>,
+    pub rent: Sysvar<'info, Rent>,
+
+    #[account(mut)]
+    pub user: Signer<'info>, //谁部署 Program
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct Drip<'info> {
-    #[account(mut, has_one=authority)]
+    #[account()]
     faucet_config: Account<'info, FaucetConfig>,
-    authority: Signer<'info>,
+
+    /// CHECK:
+    #[account(constraint =token_program.key == &token::ID)]
+    token_program: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(mut, constraint = &faucet_config.token_mint == token_mint.key)]
+    token_mint: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(constraint = &faucet_config.token_authority == token_authority.key)]
+    token_authority: AccountInfo<'info>,
+
+    /// CHECK:
+    #[account(mut)]
+    receiver: AccountInfo<'info>,
 }
