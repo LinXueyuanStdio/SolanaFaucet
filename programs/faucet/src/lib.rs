@@ -1,8 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
 use anchor_spl::token::{self, MintTo};
+// use anchor_spl::{
+//     associated_token::AssociatedToken,
+//     token::{Mint, Token, TokenAccount},
+// };
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+
 
 #[program]
 pub mod faucet {
@@ -32,10 +37,27 @@ pub mod faucet {
         };
         let cpi_program = ctx.accounts.token_program.clone();
         let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
-        token::mint_to(cpi_ctx, faucet_config.drip_volume)?;
+        anchor_spl::token::mint_to(cpi_ctx, faucet_config.drip_volume)?;
         Ok(())
     }
+
+    // pub fn airdrop(ctx: Context<Airdrop>, mint_bump: u8, amount: u64) -> ProgramResult {
+    //     anchor_spl::token::mint_to(
+    //         CpiContext::new_with_signer(
+    //             ctx.accounts.token_program.to_account_info(),
+    //             anchor_spl::token::MintTo {
+    //                 mint: ctx.accounts.mint.to_account_info(),
+    //                 to: ctx.accounts.destination.to_account_info(),
+    //                 authority: ctx.accounts.mint.to_account_info(),
+    //             },
+    //             &[&[&"faucet-mint".as_bytes(), &[mint_bump]]],
+    //         ),
+    //         amount,
+    //     )?;
+    //     Ok(())
+    // }
 }
+
 
 #[account] // 宏：序列化和反序列化
 pub struct FaucetConfig {
@@ -43,13 +65,13 @@ pub struct FaucetConfig {
     token_program: Pubkey,   // 一个 Solana Program 的公钥
     token_mint: Pubkey,      // Program 的 Account 地址，其中存储了 Token 的信息
     token_authority: Pubkey, // Program 的授权
-    nonce: u8,
-    drip_volume: u64, // 水滴体积（水龙头一次给多少币）
+    nonce: u8,               // 随机数，跟着授权走
+    drip_volume: u64,        // 水滴体积（水龙头一次给多少币）
 }
 
 #[derive(Accounts)]
 pub struct InitializeFaucet<'info> {
-    #[account(init, payer = user, space = 8 + 8)]
+    #[account(init, payer = user, space = 8 + 8 + 8)]
     pub faucet_config: Account<'info, FaucetConfig>, // 新 account 需要初始化数据
     /// CHECK:
     #[account(constraint = token_program.key == &token::ID)] //检查token_program是否正确
@@ -60,7 +82,7 @@ pub struct InitializeFaucet<'info> {
     /// CHECK:
     #[account()]
     pub token_authority: AccountInfo<'info>,
-    pub rent: Sysvar<'info, Rent>,
+    pub rent: Sysvar<'info, Rent>, // 租金
 
     #[account(mut)]
     pub user: Signer<'info>, //谁部署 Program
@@ -69,22 +91,50 @@ pub struct InitializeFaucet<'info> {
 
 #[derive(Accounts)]
 pub struct Drip<'info> {
-    #[account()]
-    faucet_config: Account<'info, FaucetConfig>,
-
+    #[account(init, payer = payer, space= 8 + 8 + 8 + 8)]
+    pub faucet_config: Account<'info, FaucetConfig>,
     /// CHECK:
-    #[account(constraint =token_program.key == &token::ID)]
-    token_program: AccountInfo<'info>,
-
+    #[account(constraint = token_program.key == &token::ID)]
+    pub token_program: AccountInfo<'info>,
     /// CHECK:
     #[account(mut, constraint = &faucet_config.token_mint == token_mint.key)]
-    token_mint: AccountInfo<'info>,
-
+    pub token_mint: AccountInfo<'info>,
     /// CHECK:
     #[account(constraint = &faucet_config.token_authority == token_authority.key)]
-    token_authority: AccountInfo<'info>,
-
+    pub token_authority: AccountInfo<'info>,
     /// CHECK:
     #[account(mut)]
-    receiver: AccountInfo<'info>,
+    pub receiver: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub payer: Signer<'info>, //谁调用 Program
+    pub system_program: Program<'info, System>,
 }
+
+// #[derive(Accounts)]
+// #[instruction(mint_bump: u8, amount: u64)] // 水龙头一次给 amount 个币
+// pub struct Airdrop<'info> {
+//     #[account(
+//         init_if_needed,
+//         payer = payer,
+//         seeds = [b"faucet-mint".as_ref()],
+//         bump = mint_bump,
+//         mint::decimals = 6,
+//         mint::authority = mint
+//     )]
+//     pub mint: Account<'info, Mint>,
+
+//     #[account(
+//         init_if_needed,
+//         payer = payer,
+//         associated_token::mint = mint,
+//         associated_token::authority = receiver
+//     )]
+//     pub destination: Account<'info, TokenAccount>,
+//     pub payer: Signer<'info>,
+//     pub receiver: AccountInfo<'info>,
+//     pub system_program: Program<'info, System>,
+//     pub token_program: Program<'info, Token>,
+//     pub associated_token_program: Program<'info, AssociatedToken>,
+//     pub rent: Sysvar<'info, Rent>,
+// }

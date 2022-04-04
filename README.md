@@ -23,7 +23,12 @@ solana-keygen new
 ```shell
 solana-test-validator
 ```
-能够启动成功就 Ctrl+C 退出
+能够启动成功就 Ctrl+C 退出。
+
+查看你的钱包地址：
+```shell
+solana config get keypair
+```
 
 ## Nodejs, npm, yarn
 ```shell
@@ -45,19 +50,28 @@ cd faucet
 
 # 前置知识
 
-Cross-Program Invocations (CPI): 跨程序调用
+1. Cross-Program Invocations (CPI): 跨程序调用
 
-Program Derived Addresses (PDA): 程序派生地址
+2. Program Derived Addresses (PDA): 程序派生地址
+    PDA 允许在程序之间调用时使用以编程方式生成的 signatures。
+    使用 PDA，程序可以被授予对帐户的权限，然后将该权限转移给另一个。
+    这是可能的，因为程序可以在授予权限的事务中充当 signer。
 
-PDA 允许在程序之间调用时使用以编程方式生成的 signatures。
-使用 PDA，程序可以被授予对帐户的权限，然后将该权限转移给另一个。
-这是可能的，因为程序可以在授予权限的事务中充当 signer。
+3. Solana Program Library (SPL): Solana 程序库
+    SPL 是针对 Sealevel 并行运行时的链上程序的集合。
 
 # 开发
+
+水龙头的逻辑：
+1. 开发完成后部署到链上，自动执行 init
+2. 用户调用 drip，附上币种
+3. 给用户发币，发币量由水龙头初始化时被指定
+
 # 测试
 
 # 部署
-在部署之前需要获取一些SOL作为燃料
+
+部署到链上需要一些 SOL 做委托费。需要获取一些 SOL：
 ```shell
 solana airdrop 5 <你的钱包地址> --url https://devnet.solana.com
 ```
