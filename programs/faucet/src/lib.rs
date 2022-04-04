@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_spl::token::{self, MintTo};
+use anchor_spl::{token::{self, MintTo, TokenAccount, Token, Mint}, associated_token::AssociatedToken};
 // use anchor_spl::{
 //     associated_token::AssociatedToken,
 //     token::{Mint, Token, TokenAccount},
@@ -41,11 +41,24 @@ pub mod faucet {
         Ok(())
     }
 
+    pub fn create(ctx: Context<Create>, authority: Pubkey, drip_volume: u64) -> Result<()> {
+        let counter = &mut ctx.accounts.counter;
+        counter.authority = authority;
+        counter.drip_volume = drip_volume;
+        Ok(())
+    }
+
+    pub fn set_drip_volume(ctx: Context<Increment>, drip_volume: u64) -> Result<()> {
+        let counter = &mut ctx.accounts.counter;
+        counter.drip_volume = drip_volume;
+        Ok(())
+    }
+
     // pub fn airdrop(ctx: Context<Airdrop>, mint_bump: u8, amount: u64) -> ProgramResult {
     //     anchor_spl::token::mint_to(
     //         CpiContext::new_with_signer(
     //             ctx.accounts.token_program.to_account_info(),
-    //             anchor_spl::token::MintTo {
+    //             MintTo {
     //                 mint: ctx.accounts.mint.to_account_info(),
     //                 to: ctx.accounts.destination.to_account_info(),
     //                 authority: ctx.accounts.mint.to_account_info(),
@@ -59,9 +72,29 @@ pub mod faucet {
 }
 
 
+#[derive(Accounts)]
+pub struct Create<'info> {
+    #[account(init, payer = user, space = 8 + 40)]
+    pub counter: Account<'info, Counter>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Increment<'info> {
+    #[account(mut, has_one = authority)]
+    pub counter: Account<'info, Counter>,
+    pub authority: Signer<'info>,
+}
+
+#[account]
+pub struct Counter {
+    pub authority: Pubkey,
+    pub drip_volume: u64,
+}
 #[account] // 宏：序列化和反序列化
 pub struct FaucetConfig {
-    /// CHECK:
     token_program: Pubkey,   // 一个 Solana Program 的公钥
     token_mint: Pubkey,      // Program 的 Account 地址，其中存储了 Token 的信息
     token_authority: Pubkey, // Program 的授权
@@ -71,11 +104,9 @@ pub struct FaucetConfig {
 
 #[derive(Accounts)]
 pub struct InitializeFaucet<'info> {
-    #[account(init, payer = user, space = 8 + 8 + 8)]
+    #[account(init, payer = user, space = 8 + 8 + 8*1000)]
     pub faucet_config: Account<'info, FaucetConfig>, // 新 account 需要初始化数据
-    /// CHECK:
-    #[account(constraint = token_program.key == &token::ID)] //检查token_program是否正确
-    pub token_program: AccountInfo<'info>,
+    pub token_program: Program<'info, Token>,
     /// CHECK:
     #[account(mut)]
     pub token_mint: AccountInfo<'info>, //让 Program能够把数据持久化到 account.data 中
@@ -91,7 +122,7 @@ pub struct InitializeFaucet<'info> {
 
 #[derive(Accounts)]
 pub struct Drip<'info> {
-    #[account(init, payer = payer, space= 8 + 8 + 8 + 8)]
+    #[account()]
     pub faucet_config: Account<'info, FaucetConfig>,
     /// CHECK:
     #[account(constraint = token_program.key == &token::ID)]
@@ -105,36 +136,4 @@ pub struct Drip<'info> {
     /// CHECK:
     #[account(mut)]
     pub receiver: AccountInfo<'info>,
-
-    #[account(mut)]
-    pub payer: Signer<'info>, //谁调用 Program
-    pub system_program: Program<'info, System>,
 }
-
-// #[derive(Accounts)]
-// #[instruction(mint_bump: u8, amount: u64)] // 水龙头一次给 amount 个币
-// pub struct Airdrop<'info> {
-//     #[account(
-//         init_if_needed,
-//         payer = payer,
-//         seeds = [b"faucet-mint".as_ref()],
-//         bump = mint_bump,
-//         mint::decimals = 6,
-//         mint::authority = mint
-//     )]
-//     pub mint: Account<'info, Mint>,
-
-//     #[account(
-//         init_if_needed,
-//         payer = payer,
-//         associated_token::mint = mint,
-//         associated_token::authority = receiver
-//     )]
-//     pub destination: Account<'info, TokenAccount>,
-//     pub payer: Signer<'info>,
-//     pub receiver: AccountInfo<'info>,
-//     pub system_program: Program<'info, System>,
-//     pub token_program: Program<'info, Token>,
-//     pub associated_token_program: Program<'info, AssociatedToken>,
-//     pub rent: Sysvar<'info, Rent>,
-// }
