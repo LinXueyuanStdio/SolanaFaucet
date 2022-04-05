@@ -134,7 +134,8 @@ import { Faucet } from '../target/types/faucet';
 // });
 
 describe("Faucet", () => {
-  const provider = getProvider();
+  const provider = anchor.Provider.env();
+  anchor.setProvider(provider);
   const faucetProgram = workspace.Faucet as Program<Faucet>;
 
   let faucetConfig: web3.Keypair;

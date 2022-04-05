@@ -1,13 +1,17 @@
 [features]
 seeds = false
-[programs.localnet]
-faucet = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
-
 [registry]
 url = "https://anchor.projectserum.com"
 
+[programs.localnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
+[programs.devnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
+[programs.mainnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
 [provider]
-cluster = "localnet"
+cluster = "devnet"
+# cluster = "localnet"
 wallet = "/home/linxueyuan/.config/solana/id.json"
 
 [scripts]

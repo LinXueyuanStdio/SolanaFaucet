@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
 use anchor_spl::{token::{self, MintTo, Token}};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw");
 
 
 #[program]

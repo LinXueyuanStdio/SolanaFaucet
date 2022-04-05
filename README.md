@@ -80,7 +80,31 @@ cd faucet
 
 # 测试
 
+## 本地网测试
 `anchor test` 命令会自动拉起一个随机的本地网并在上面部署测试一条龙，这时候你不能再手动挂着另一个本地网了。如果你需要手动挂着一个本地网也行，使用 `anchor test --skip-local-validator`。
+
+## 开发网测试
+测试脚本改一下环境
+```ts
+const provider = anchor.Provider.env();
+anchor.setProvider(provider);
+```
+配置 Anchor 到 devnet 去测试
+```toml
+# Anchor.toml
+[programs.localnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
+[programs.devnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
+[programs.mainnet]
+faucet = "pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw"
+[provider]
+cluster = "devnet"
+# cluster = "localnet"
+wallet = "/home/linxueyuan/.config/solana/id.json"
+```
+在 devnet 测试前会自动部署到 devnet，注意一下部署有没有成功
+
 
 # 部署
 
@@ -97,6 +121,25 @@ npm run deploy:devnet
 Program Id: <program-id>
 
 Deploy success
+```
+
+可能需要改一下 program id
+
+执行它之前，需要知道我们的 program ID，我们可以通过下面的指令得到它
+```
+solana address -k target/deploy/faucet-keypair.json
+```
+并且在
+```
+// src/lib.rs
+// 把原本在裡面的數值換成我們的program id
+declare_id!("your-program-id");
+```
+和
+```
+# Anchor.toml
+[programs.localnet]
+faucet = "your-program-id"
 ```
 
 # BUG 记录
@@ -184,6 +227,12 @@ Transaction executed in slot 125754582:
 
 Confirmed
 ```
+如果白嫖太频繁也会被拒绝交易 `rate limit`：
+```shell
+$ solana airdrop 2
+Requesting airdrop of 2 SOL
+Error: airdrop request failed. This can happen when the rate limit is reached.
+```
 白嫖成功是这样：
 ```shell
 # linxueyuan @ CAD-GPU96 in ~/github/SolanaFaucet on git:main x [0:22:54]
@@ -224,6 +273,14 @@ Keypair Path: /home/linxueyuan/.config/solana/id.json
 Commitment: confirmed
 (base)
 ```
+Q:
+```shell
+==================================================================================
+Error: Pubsub error: ConnectionError(Url(UnableToConnect("wss://api.devnet.solana.com/")))
+There was a problem deploying: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "" }
+```
+A:
+
 ## 程序 BUG
 Q: account Address already in use
 ```shell

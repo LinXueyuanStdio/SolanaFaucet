@@ -1,0 +1,37 @@
+Streaming transaction logs mentioning pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw. Confirmed commitment
+Transaction executed in slot 56:
+  Signature: 2pkkExh4YZPh7HbPsuKa1jp4JoLUZEp1ZWMyGGHGiiz5gkNfbZnTMW3RQvjcwc2U1y86e9SG8sSA8EGKKreXSHjQ
+  Status: Ok
+  Log Messages:
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw invoke [1]
+    Program log: Instruction: Initialize
+    Program 11111111111111111111111111111111 invoke [2]
+    Program 11111111111111111111111111111111 success
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw consumed 9523 of 1400000 compute units
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw success
+Transaction executed in slot 57:
+  Signature: 32YFFhGckPX87fhzDZwfnWm82Lz2gLHgWpARZCxbnsfzzobNVD4s19XU7qirbKnP35qSsR4nDUGnudcUtzdKd29N
+  Status: Ok
+  Log Messages:
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw invoke [1]
+    Program log: Instruction: SetDripVolume
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw consumed 2614 of 1400000 compute units
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw success
+Transaction executed in slot 58:
+  Signature: 5yx4zjnEZ9pnR5oGcg9hiPj9hgeeaZJkHqTWkUMes3b24JXSiLmdBx68EDmHimPNCoNHsqAZtTUmsqvBUCLicHov
+  Status: Ok
+  Log Messages:
+    Program 11111111111111111111111111111111 invoke [1]
+    Program 11111111111111111111111111111111 success
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [1]
+    Program log: Instruction: InitializeAccount
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 3480 of 1400000 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw invoke [1]
+    Program log: Instruction: Drip
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA invoke [2]
+    Program log: Instruction: MintTo
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA consumed 2860 of 1390707 compute units
+    Program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA success
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw consumed 9069 of 1396520 compute units
+    Program pNZo25EcxWvfwPXVVnzPaszBsFNpit1N7ErAcL7w8Bw success
