@@ -144,6 +144,7 @@ describe("Faucet", () => {
 
   const testTokenDecimals = 9;
   const dripVolume: BN = new BN(10 ** testTokenDecimals);
+  const dripVolume_next: BN = new BN(10 ** testTokenDecimals + 1);
 
   before(async () => {
     faucetConfig = web3.Keypair.generate();
@@ -159,10 +160,8 @@ describe("Faucet", () => {
     console.log("testTokenMint", testTokenMint.toString());
   });
 
-  describe("#initialize", () => {
-    it("should init successful", async () => {
-      // let ix = await faucetProgram.account.faucetConfig.createInstruction(faucetConfig);
-
+  describe("# initialize", () => {
+    it("Should init successful", async () => {
       await faucetProgram.rpc.initialize(nonce, dripVolume, {
         accounts: {
           faucetConfig: faucetConfig.publicKey,
@@ -175,10 +174,7 @@ describe("Faucet", () => {
           systemProgram: SystemProgram.programId
         },
         signers: [faucetConfig],
-        // instructions: [ix],
       });
-
-      console.log(faucetConfig.publicKey.toString());
 
       const faucetConfigAccount = await faucetProgram.account.faucetConfig.fetch(faucetConfig.publicKey);
 
@@ -200,10 +196,23 @@ describe("Faucet", () => {
         dripVolume.toNumber()
       );
     });
+    it("Updates Drip Volume", async () => {
+      await faucetProgram.rpc.setDripVolume(dripVolume_next, {
+        accounts: {
+          faucetConfig: faucetConfig.publicKey,
+          authority: provider.wallet.publicKey,
+        },
+      });
+
+      const configAccount = await faucetProgram.account.faucetConfig.fetch(faucetConfig.publicKey);
+
+      assert.ok(configAccount.authority.equals(provider.wallet.publicKey));
+      assert.ok(configAccount.dripVolume.toNumber() == dripVolume_next.toNumber());
+    });
   });
 
-  describe("#drip", () => {
-    it("should drip successful", async () => {
+  describe("# drip", () => {
+    it("Should drip successful", async () => {
       const signers: web3.Keypair[] = [];
       const instructions: web3.TransactionInstruction[] = [];
       const receiver = web3.Keypair.generate();
@@ -236,7 +245,7 @@ describe("Faucet", () => {
         receiverTokenAccount.publicKey
       );
 
-      assert.strictEqual(tokenAccount.amount.toNumber(), dripVolume.toNumber());
+      assert.strictEqual(tokenAccount.amount.toNumber(), dripVolume_next.toNumber());
     });
   });
 });

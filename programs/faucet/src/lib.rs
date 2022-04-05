@@ -1,10 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_spl::{token::{self, MintTo, TokenAccount, Token, Mint}, associated_token::AssociatedToken};
-// use anchor_spl::{
-//     associated_token::AssociatedToken,
-//     token::{Mint, Token, TokenAccount},
-// };
+use anchor_spl::{token::{self, MintTo, Token}};
 
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
@@ -18,6 +14,7 @@ pub mod faucet {
         faucet_config.token_program = *ctx.accounts.token_program.key;
         faucet_config.token_mint = *ctx.accounts.token_mint.key;
         faucet_config.token_authority = *ctx.accounts.token_authority.key;
+        faucet_config.authority = *ctx.accounts.user.key;
         faucet_config.nonce = nonce;
         faucet_config.drip_volume = drip_volume;
         Ok(())
@@ -41,65 +38,21 @@ pub mod faucet {
         Ok(())
     }
 
-    pub fn create(ctx: Context<Create>, authority: Pubkey, drip_volume: u64) -> Result<()> {
-        let counter = &mut ctx.accounts.counter;
-        counter.authority = authority;
-        counter.drip_volume = drip_volume;
-        Ok(())
-    }
-
     pub fn set_drip_volume(ctx: Context<Increment>, drip_volume: u64) -> Result<()> {
-        let counter = &mut ctx.accounts.counter;
-        counter.drip_volume = drip_volume;
+        let faucet_config = &mut ctx.accounts.faucet_config;
+        faucet_config.drip_volume = drip_volume;
         Ok(())
     }
-
-    // pub fn airdrop(ctx: Context<Airdrop>, mint_bump: u8, amount: u64) -> ProgramResult {
-    //     anchor_spl::token::mint_to(
-    //         CpiContext::new_with_signer(
-    //             ctx.accounts.token_program.to_account_info(),
-    //             MintTo {
-    //                 mint: ctx.accounts.mint.to_account_info(),
-    //                 to: ctx.accounts.destination.to_account_info(),
-    //                 authority: ctx.accounts.mint.to_account_info(),
-    //             },
-    //             &[&[&"faucet-mint".as_bytes(), &[mint_bump]]],
-    //         ),
-    //         amount,
-    //     )?;
-    //     Ok(())
-    // }
 }
 
-
-#[derive(Accounts)]
-pub struct Create<'info> {
-    #[account(init, payer = user, space = 8 + 40)]
-    pub counter: Account<'info, Counter>,
-    #[account(mut)]
-    pub user: Signer<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct Increment<'info> {
-    #[account(mut, has_one = authority)]
-    pub counter: Account<'info, Counter>,
-    pub authority: Signer<'info>,
-}
-
-#[account]
-pub struct Counter {
-    pub authority: Pubkey,
-    pub drip_volume: u64,
-}
 #[account] // 宏：序列化和反序列化
 pub struct FaucetConfig {
-    token_program: Pubkey,   // 一个 Solana Program 的公钥
-    token_mint: Pubkey,      // Program 的 Account 地址，其中存储了 Token 的信息
-    token_authority: Pubkey, // Program 的授权
-    nonce: u8,               // 随机数，跟着授权走
-    drip_volume: u64,        // 水滴体积（水龙头一次给多少币）
+    pub token_program: Pubkey,   // 一个 Solana Program 的公钥
+    pub token_mint: Pubkey,      // Program 的 Account 地址，其中存储了 Token 的信息
+    pub token_authority: Pubkey, // Program 的授权
+    pub nonce: u8,               // 随机数，跟着授权走
+    pub authority: Pubkey,
+    pub drip_volume: u64,        // 水滴体积（水龙头一次给多少币）
 }
 
 #[derive(Accounts)]
@@ -118,6 +71,13 @@ pub struct InitializeFaucet<'info> {
     #[account(mut)]
     pub user: Signer<'info>, //谁部署 Program
     pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct Increment<'info> {
+    #[account(mut, has_one = authority)]
+    pub faucet_config: Account<'info, FaucetConfig>,
+    pub authority: Signer<'info>,
 }
 
 #[derive(Accounts)]
